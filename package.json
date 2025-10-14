@@ -14,6 +14,8 @@
   "author": "Sawan Kumar Das",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.1"
   }
 }
