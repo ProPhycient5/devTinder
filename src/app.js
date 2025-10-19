@@ -6,10 +6,21 @@ const app = express();
 app.use(express.json())                 //middleware to convert JSON data into JS object
 
 app.post("/signup", async (req, res) => {
+    const ALLOWED_SIGNUP_FIELDS = ["firstName", "lastName", "email", "password",
+        "photoUrl", "bio", "gender", "age", "skills"
+    ]
+    const data = req.body;
     console.log(req.body)
     //Creating an instance of the User model
     const user = new User(req.body);
     try {
+        const isAllowedFields = Object.keys(data).every((k) => ALLOWED_SIGNUP_FIELDS.includes(k))
+        if (!isAllowedFields) {
+            throw new Error("Sign up not allowed")
+        }
+        if (data?.skills?.length > 10) {
+            throw new Error("Skills should be under 10")
+        }
         await user.save();
         res.send("User added successfully - POST")
     } catch (err) {
@@ -73,15 +84,26 @@ app.delete("/user", async (req, res) => {
 })
 
 //update the user by id
-app.patch("/user", async (req, res) => {
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params?.userId;
     const data = req.body;
+    console.log(data)
+    const ALLOWED_UPDATES = [
+        "photoUrl", "bio", "gender", "age", "skills", "email"
+    ]
     try {
+        const isUpdateAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k))
+        if (!isUpdateAllowed) {
+            throw new Error("Update not allowed")
+        }
+        if (data?.skills?.length > 10) {
+            throw new Error("Skills should be under 10")
+        }
         const user = await User.findByIdAndUpdate(userId, data, { returnDocument: "before", runValidators: true });
         console.log(user)
         res.send("User updated successfully")
     } catch (err) {
-        res.status(400).send("Something went wrong" + err.message)
+        res.status(400).send("Something went wrong " + err.message)
     }
 })
 
