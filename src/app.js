@@ -1,32 +1,50 @@
 const express = require('express');
+const bcrypt = require("bcrypt");
 const connectDB = require("./config/db");
-const User = require("./model/user")
+const User = require("./model/user");
+const { validateSignUpData } = require("./utils/validations");
 const app = express();
 
 app.use(express.json())                 //middleware to convert JSON data into JS object
 
 app.post("/signup", async (req, res) => {
-    const ALLOWED_SIGNUP_FIELDS = ["firstName", "lastName", "email", "password",
-        "photoUrl", "bio", "gender", "age", "skills"
-    ]
-    const data = req.body;
-    console.log(req.body)
-    //Creating an instance of the User model
-    const user = new User(req.body);
     try {
-        const isAllowedFields = Object.keys(data).every((k) => ALLOWED_SIGNUP_FIELDS.includes(k))
-        if (!isAllowedFields) {
-            throw new Error("Sign up not allowed")
-        }
-        if (data?.skills?.length > 10) {
-            throw new Error("Skills should be under 10")
-        }
+        //validation 
+        validateSignUpData(req);
+
+        //encrypt password
+        const { firstName, lastName, email, password } = req.body;
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        //Creating an instance of the User model
+        const user = new User({
+            firstName, lastName, email, password: passwordHash
+        });
         await user.save();
-        res.send("User added successfully - POST")
+        res.send("User added successfully - SignUp")
     } catch (err) {
-        res.status(400).send("Error while saving: " + err.message)
+        res.status(400).send("Error while signing up : " + err.message)
     }
 
+})
+
+app.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            throw new Error("Invalid credential")
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if (isPasswordValid) {
+            res.send("Login successful")
+        } else {
+            throw new Error("Invalid credential")
+        }
+
+    } catch (err) {
+        res.status(400).send("Error while login : " + err.message)
+    }
 })
 
 //get a single user from email

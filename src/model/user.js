@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true,
         validate(value) {                             //this works when a new document is created
             if (!["male", "female", "other"].includes(value)) {
                 throw new Error("Gender is not valid")
