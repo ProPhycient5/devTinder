@@ -1,6 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../model/connectionRequest");
+const User = require("../model/user");
 
 const userRouter = express.Router();
 
@@ -38,6 +39,36 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         res.json({ data })
     } catch (err) {
         res.status(400).send("Error :" + err.message)
+    }
+})
+
+//loggedInUser should see all the users except following:
+// 1. Own card
+// 2. Own connections
+// 3. ignored people
+// 4. already sent the connection request
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+        const connectionRequests = await ConnectionRequest.find({
+            $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }]
+        }).select("fromUserId toUserId");
+
+        const hideUsersFromFeed = new Set();
+        connectionRequests.forEach((req) => {
+            hideUsersFromFeed.add(req.fromUserId.toString());
+            hideUsersFromFeed.add(req.toUserId.toString())
+        });
+
+        const users = await User.find({
+            $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } }, { _id: { $ne: loggedInUser._id } }]
+        }).select(SAFE_USER_DATA)
+
+        res.json(users)
+
+    } catch (err) {
+        res.status(400).send("Error :", err.message)
     }
 })
 
