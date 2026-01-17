@@ -40,7 +40,7 @@ authRouter.post("/login", async (req, res) => {
             const token = await user.getJWT()
             //Add the token to cookies and send the response to the user
             res.cookie("token", token, { expires: new Date(Date.now() + 24 * 3600000), httpOnly: true })  //expires in 8hrs
-            res.send("Login successful")
+            res.send(user)
         } else {
             throw new Error("Invalid credential")
         }
