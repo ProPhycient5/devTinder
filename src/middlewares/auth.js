@@ -2,11 +2,11 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/user")
 
 const userAuth = async (req, res, next) => {
-    //read toke from cookies
+    //read token from cookies
     try {
         const { token } = req.cookies;
         if (!token) {
-            throw new Error("Token is not valid")
+           return res.status(401).send("Please login!");
         }
 
         const decodedObj = await jwt.verify(token, "DEVTINDER@58");

@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
                 throw new Error("Invalid URL " + value)
             }
         },
-        default: "https://www.kindpng.com/imgv/ioJmwwJ_dummy-profile-image-jpg-hd-png-download/"
+        default: "https://wallpapers.com/images/hd/placeholder-profile-icon-8qmjk1094ijhbem9.jpg"
     },
     skills: {
         type: [String]

@@ -5,7 +5,7 @@ const User = require("../model/user");
 
 const userRouter = express.Router();
 
-const SAFE_USER_DATA = "firstName lastName gender age bio skill"
+const SAFE_USER_DATA = "firstName lastName gender age bio skill photoUrl"
 
 //fetching all the connection request that is in pending(interested) state for the loggedIn user.
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
@@ -71,7 +71,6 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         const users = await User.find({
             $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } }, { _id: { $ne: loggedInUser._id } }]
         }).select(SAFE_USER_DATA).skip(skip).limit(limit);
-
         res.json(users)
 
     } catch (err) {
