@@ -22,9 +22,9 @@ app.use("/", profileRouter);
 app.use("/", userRouter);
 
 connectDB().then(() => {
-    console.log("Connection cannot be established.");
+    console.log("DB connection started...");
     app.listen("3000", () => {
-        console.log("Server has started successfully")
+        console.log("Server has started successfully...")
     })
 }).catch((err) => {
     console.error("Connection cannot be established" + err.message)
